@@ -902,14 +902,14 @@ toastMsg(‘Erro ao salvar perfil’, ‘erro’);
     /* Esconde nav-tabs do header (vira bottom nav) */
     .nav-tabs { display: none; }
 
-    /* Botões do header viram ícones compactos */
+    /* Botões do header */
     .btn-export, .btn-import { display: none; }
     #theme-toggle-btn { display: none; }
     .month-nav { gap: 4px; }
     .month-nav button { width: 28px; height: 28px; font-size: 1rem; }
     #month-label { font-size: 0.78rem; min-width: 90px; }
 
-    /* Header right compacto */
+    /* Header right */
     .header-right { gap: 4px; }
     #user-avatar-wrap { flex-shrink: 0; }
 
@@ -1363,7 +1363,7 @@ toastMsg(‘Erro ao salvar perfil’, ‘erro’);
 </head>
 <body>
 <!-- TELA DE LOGIN -->
-<div id="login-screen" style="display:none;">
+<div id="login-screen" style="display:flex;">
   <div class="login-card">
     <div class="login-logo">⟁ HYLIAN</div>
     <div style="font-size:1.4rem;font-weight:800;color:var(--text-light);margin-bottom:4px;">Finance</div>
@@ -1428,9 +1428,8 @@ toastMsg(‘Erro ao salvar perfil’, ‘erro’);
     <span class="drawer-title">⟁ HYLIAN FINANCE</span>
     <button class="drawer-close" id="drawer-close-btn">✕</button>
   </div>
-  <button class="drawer-item" onclick="toggleTheme(); atualizarDrawerTema(); closeDrawer()">
-    <span class="drawer-icon" id="drawer-tema-icon">🌙</span>
-    <span id="drawer-tema-label">Modo escuro</span>
+  <button class="drawer-item" onclick="toggleTheme(); closeDrawer()">
+    <span class="drawer-icon">🌙</span> Alternar tema
   </button>
   <button class="drawer-item" onclick="exportarJSON(); closeDrawer()">
     <span class="drawer-icon">⬇</span> Exportar dados
@@ -1806,13 +1805,6 @@ function toggleTheme() {
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   updateThemeIcon();
   updateChartTheme();
-}
-function atualizarDrawerTema() {
-  const isDark = document.documentElement.classList.contains('dark');
-  const ic = document.getElementById('drawer-tema-icon');
-  const lb = document.getElementById('drawer-tema-label');
-  if (ic) ic.textContent = isDark ? '☀️' : '🌙';
-  if (lb) lb.textContent = isDark ? 'Modo claro' : 'Modo escuro';
 }
 function updateThemeIcon() {
   const isDark = document.documentElement.classList.contains('dark');
