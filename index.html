@@ -38,7 +38,14 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-shell').style.display = 'block';
     atualizarUIUsuario(user);
+
+    // Mostra loading overlay enquanto dados chegam
+    document.getElementById('loading-overlay').style.display = 'flex';
+
     await carregarTudoFirebase();
+
+    // Esconde loading e renderiza tudo de uma vez
+    document.getElementById('loading-overlay').style.display = 'none';
     renderAll();
     renderizarCartoes();
     renderizarCompras();
@@ -66,42 +73,54 @@ window.logoutApp = async function() {
   });
 };
 
-// ===== FIRESTORE: carregar tudo =====
+// ===== FIRESTORE: carregar tudo (paralelo, muito mais rápido) =====
 window.carregarTudoFirebase = async function() {
   if (!window._currentUser) return;
   const uid = window._currentUser.uid;
-  // Transações: colecao fin_{uid}
-  // Mensalidades: doc users/{uid}/data/mensalidades
-  // Cartões: doc users/{uid}/data/cartoes
-  // Compras: doc users/{uid}/data/compras
-  // Metas: doc users/{uid}/data/metas
+
+  // Mostra loading sutil no header
+  const monthLabel = document.getElementById('month-label');
+  const monthLabelD = document.getElementById('month-label-d');
+  const loadingTxt = '⏳ carregando...';
+  if (monthLabel) monthLabel.textContent = loadingTxt;
+  if (monthLabelD) monthLabelD.textContent = loadingTxt;
+
   try {
-    // Mensalidades
-    const mensSnap = await getDoc(doc(db, `users/${uid}/data/mensalidades`));
-    window._mensalidades = mensSnap.exists() ? (mensSnap.data().lista || []) : [];
-
-    // Cartões
-    const cartSnap = await getDoc(doc(db, `users/${uid}/data/cartoes`));
-    window._cartoes = cartSnap.exists() ? (cartSnap.data().lista || []) : [];
-
-    // Compras
-    const compSnap = await getDoc(doc(db, `users/${uid}/data/compras`));
-    window._compras = compSnap.exists() ? (compSnap.data().lista || []) : [];
-
-    // Metas
-    const metasSnap = await getDoc(doc(db, `users/${uid}/data/metas`));
-    window._metas = metasSnap.exists() ? (metasSnap.data() || {}) : { orcamentos: {}, metaEconomia: 0 };
-    if (!window._metas.orcamentos) window._metas.orcamentos = {};
-
-    // Transações do mês atual e vizinhos (-6 meses)
+    // Calcula os 7 meses necessários
+    const meses = [];
     for (let i = 0; i <= 6; i++) {
       let m = new Date().getMonth() - i;
       let y = new Date().getFullYear();
       while (m < 0) { m += 12; y--; }
-      await _carregarTransacoesMes(uid, y, m);
+      meses.push({ y, m, key: `fin_${y}_${m}` });
     }
+
+    // Dispara TUDO em paralelo — muito mais rápido que sequencial
+    const [mensSnap, cartSnap, compSnap, metasSnap, ...txSnaps] = await Promise.all([
+      getDoc(doc(db, `users/${uid}/data/mensalidades`)),
+      getDoc(doc(db, `users/${uid}/data/cartoes`)),
+      getDoc(doc(db, `users/${uid}/data/compras`)),
+      getDoc(doc(db, `users/${uid}/data/metas`)),
+      ...meses.map(({ y, m }) => getDoc(doc(db, `users/${uid}/transacoes/fin_${y}_${m}`)))
+    ]);
+
+    // Processa resultados
+    window._mensalidades = mensSnap.exists() ? (mensSnap.data().lista || []) : [];
+    window._cartoes      = cartSnap.exists()  ? (cartSnap.data().lista  || []) : [];
+    window._compras      = compSnap.exists()  ? (compSnap.data().lista  || []) : [];
+    window._metas        = metasSnap.exists() ? (metasSnap.data() || {}) : { orcamentos: {}, metaEconomia: 0 };
+    if (!window._metas.orcamentos) window._metas.orcamentos = {};
+
+    if (!window._txCache) window._txCache = {};
+    txSnaps.forEach((snap, i) => {
+      window._txCache[meses[i].key] = snap.exists() ? (snap.data().lista || []) : [];
+    });
+
   } catch(e) {
     console.error('Erro ao carregar Firebase:', e);
+    toastMsg('Erro ao carregar dados. Verifique sua conexão.', 'erro');
+  } finally {
+    updateMonthLabel(); // restaura label do mês
   }
 };
 
@@ -754,15 +773,14 @@ window.salvarPerfil = async function() {
     color: #ff6b6b;
   }
   .add-card-form {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 12px;
     align-items: flex-end;
     margin-bottom: 24px;
-    flex-wrap: wrap;
   }
   .add-card-form .form-group {
-    flex: 1;
-    min-width: 120px;
+    min-width: 0;
   }
   .btn-add-card {
     background: var(--accent);
@@ -771,6 +789,8 @@ window.salvarPerfil = async function() {
     padding: 10px 20px;
     font-weight: 700;
     cursor: pointer;
+    grid-column: 1 / -1;
+    width: 100%;
   }
   .compra-list {
     display: flex;
@@ -1049,7 +1069,9 @@ window.salvarPerfil = async function() {
     /* Cartões full width */
     .credit-card { width: 100%; max-width: 100%; }
     .cards-list { gap: 16px; }
-    .add-card-form { flex-direction: column; }
+    .add-card-form {
+      grid-template-columns: 1fr !important;
+    }
     .add-card-form .form-group { min-width: unset; }
 
     /* Mensalidades */
@@ -1207,6 +1229,11 @@ window.salvarPerfil = async function() {
   }
   @keyframes pulse-dot {
     0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.8)}
+  }
+  @keyframes loading-bar {
+    0%   { transform: translateX(-100%); }
+    50%  { transform: translateX(0%); }
+    100% { transform: translateX(100%); }
   }
   .btn-logout {
     width: 100%;
@@ -1407,6 +1434,15 @@ window.salvarPerfil = async function() {
 
 <!-- APP PRINCIPAL -->
 <div id="app-shell" style="display:none;">
+
+<!-- Loading overlay -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:var(--bg-light);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div style="font-size:2rem;">⟁</div>
+  <div style="font-size:0.9rem;color:var(--muted-light);font-weight:600;letter-spacing:1px;">Carregando seus dados...</div>
+  <div style="width:48px;height:3px;background:var(--border-light);border-radius:3px;overflow:hidden;">
+    <div style="height:100%;background:var(--accent);border-radius:3px;animation:loading-bar 1.2s ease-in-out infinite;"></div>
+  </div>
+</div>
 <header>
   <div class="logo">
     <i data-lucide="triangle" class="w-5 h-5 fill-current"></i>
