@@ -48,6 +48,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('loading-overlay').style.display = 'none';
     renderAll();
     renderizarCartoes();
+    atualizarSelectCartoes();
     renderizarCompras();
     renderMetas();
   } else {
@@ -514,6 +515,10 @@ window.salvarPerfil = async function() {
   }
   input:focus, select:focus {
     border-color: var(--accent);
+  }
+  select option {
+    color: #111827;
+    background: #ffffff;
   }
   .tipo-toggle {
     display: flex;
@@ -1654,19 +1659,27 @@ header {
   box-shadow: 0 10px 22px rgba(225,6,44,0.26);
 }
 .month-nav button,
-.btn-export,
 .btn-import,
 .theme-toggle,
 .bottom-nav button {
   background: rgba(255,255,255,0.04);
   border-color: rgba(255,255,255,0.06);
 }
+.btn-export {
+  background: linear-gradient(135deg, #e1062c 0%, #ff355d 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 14px 30px rgba(225,6,44,0.22);
+}
 .month-nav button:hover,
-.btn-export:hover,
 .btn-import:hover,
 .theme-toggle:hover,
 .bottom-nav button:hover {
   background: rgba(255,255,255,0.08);
+}
+.btn-export:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 18px 36px rgba(225,6,44,0.28);
 }
 #month-label {
   color: #fff;
@@ -1725,6 +1738,9 @@ input:focus, select:focus, textarea:focus {
 }
 .btn-google:hover {
   background: rgba(255,255,255,0.09);
+}
+#theme-toggle-btn {
+  display: none !important;
 }
 .login-card {
   max-width: 430px;
@@ -2274,16 +2290,15 @@ function updateChartTheme() {
   }
 }
 function initTheme() {
-  const isDark = localStorage.getItem('theme') !== 'light';
-  if (isDark) document.documentElement.classList.add('dark');
-  else document.documentElement.classList.remove('dark');
+  document.documentElement.classList.add('dark');
+  localStorage.setItem('theme', 'dark');
   updateThemeIcon();
   updateChartTheme();
 }
 function toggleTheme() {
-  document.documentElement.classList.toggle('dark');
-  const isDark = document.documentElement.classList.contains('dark');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  // Tema fixo em dark por enquanto, para manter consistência visual da marca.
+  document.documentElement.classList.add('dark');
+  localStorage.setItem('theme', 'dark');
   updateThemeIcon();
   updateChartTheme();
 }
@@ -2875,7 +2890,7 @@ function importarJSON(input) {
       }
 
       toastMsg('✓ Dados importados com sucesso!');
-      renderAll(); renderizarCartoes(); renderizarCompras(); renderMetas();
+      renderAll(); renderizarCartoes(); atualizarSelectCartoes(); renderizarCompras(); renderMetas();
     } catch(err) { console.error(err); toastMsg('Arquivo inválido!', 'erro'); }
   };
   reader.readAsText(file);
@@ -3027,7 +3042,12 @@ function removerCartao(id) {
 }
 function atualizarSelectCartoes() {
   const select = document.getElementById('compra-cartao');
+  if (!select) return;
   const cartoes = getCartoes();
+  if (cartoes.length === 0) {
+    select.innerHTML = '<option value="">Nenhum cartão cadastrado</option>';
+    return;
+  }
   select.innerHTML = '<option value="">Selecione um cartão</option>';
   cartoes.forEach(c => select.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
 }
@@ -3079,6 +3099,7 @@ function renderizarCartoes() {
       <button class="card-remove" onclick="removerCartao(${c.id})">✕</button>
     </div>`;
   }).join('');
+  atualizarSelectCartoes();
   lucide.createIcons();
 }
 function renderizarCompras() {
