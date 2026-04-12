@@ -244,7 +244,7 @@ window.salvarPerfil = async function() {
     --text-light: #1e293b;
     --muted-light: #64748b;
     --accent: #c9f25d;
-    --accent2: #E31A2A;
+    --accent2: #e05555;
     --accent3: #f27b5d;
     --red: #f25d5d;
     --green: #5df2a0;
@@ -642,7 +642,7 @@ window.salvarPerfil = async function() {
   }
   .tx-edit:hover {
     color: var(--accent2);
-    background: rgba(227,26,42,0.1);
+    background: rgba(224,85,85,0.1);
   }
   .tx-del:hover {
     color: var(--red);
@@ -1821,25 +1821,25 @@ input:focus, select:focus, textarea:focus {
 
 
   /* ===== MIRAIX PLANEJADOR DE METAS ===== */
-  .miraix-painel { border-color: rgba(227,26,42,0.3); margin-top: 24px; }
-  .miraix-badge-ia { font-size:0.6rem; font-weight:700; letter-spacing:1px; background:#E31A2A; color:#fff; padding:2px 7px; border-radius:20px; margin-left:4px; vertical-align:middle; }
-  .miraix-sugestoes { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .miraix-metas-panel { border-color: rgba(227,26,42,0.25); margin-top: 24px; }
+  .miraix-ia-badge { font-size:0.6rem; font-weight:700; letter-spacing:1px; background:#E31A2A; color:#fff; padding:2px 7px; border-radius:20px; margin-left:4px; vertical-align:middle; }
+  .miraix-sugs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
   .miraix-sug { font-size:0.75rem; padding:5px 10px; border-radius:20px; border:1px solid var(--border-light); background:var(--surface2-light); color:var(--muted-light); cursor:pointer; font-family:inherit; transition:all 0.15s; }
   .miraix-sug:hover { border-color:#E31A2A; color:#E31A2A; background:rgba(227,26,42,0.05); }
-  .miraix-input-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
-  .miraix-input-row input { flex:1; }
-  .miraix-enviar { width:38px; height:38px; border-radius:12px; border:none; background:#E31A2A; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:filter 0.2s; }
-  .miraix-enviar:hover { filter:brightness(1.1); }
-  .miraix-enviar:disabled { opacity:0.5; cursor:not-allowed; }
-  .miraix-loading { font-size:0.8rem; color:var(--muted-light); padding:6px 0; text-align:center; display:none; }
-  .miraix-resultado { background:var(--surface2-light); border:1px solid var(--border-light); border-radius:14px; padding:16px; margin-top:8px; display:none; }
-  .miraix-resultado h4 { font-size:0.9rem; font-weight:700; margin-bottom:12px; color:var(--text-light); }
-  .miraix-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+  .miraix-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+  .miraix-row input { flex:1; }
+  .miraix-btn-send { width:38px; height:38px; border-radius:12px; border:none; background:#E31A2A; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:filter 0.2s; }
+  .miraix-btn-send:hover { filter:brightness(1.1); }
+  .miraix-btn-send:disabled { opacity:0.5; cursor:not-allowed; }
+  .miraix-status { font-size:0.8rem; color:var(--muted-light); padding:6px 0; text-align:center; display:none; }
+  .miraix-result { background:var(--surface2-light); border:1px solid var(--border-light); border-radius:14px; padding:16px; margin-top:8px; display:none; }
+  .miraix-result h4 { font-size:0.9rem; font-weight:700; margin-bottom:12px; color:var(--text-light); }
+  .miraix-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
   .miraix-card { background:var(--surface-light); border:1px solid var(--border-light); border-radius:10px; padding:10px 12px; }
   .miraix-card label { font-size:0.65rem; color:var(--muted-light); text-transform:uppercase; letter-spacing:0.8px; display:block; margin-bottom:4px; }
   .miraix-card span { font-size:1rem; font-weight:700; color:#E31A2A; display:block; }
-  .miraix-analise-txt { font-size:0.82rem; color:var(--muted-light); line-height:1.6; margin-bottom:12px; white-space:pre-line; }
-  @media (max-width:768px) { .miraix-grid { grid-template-columns:1fr; } }
+  .miraix-analise { font-size:0.82rem; color:var(--muted-light); line-height:1.6; margin-bottom:12px; white-space:pre-line; }
+  @media (max-width:768px) { .miraix-cards { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -2252,36 +2252,36 @@ input:focus, select:focus, textarea:focus {
   </div>
 
 
-    <!-- PAINEL MIRAIX PLANEJADOR DE METAS -->
-    <div class="panel miraix-painel">
+    <!-- PAINEL MIRAIX PLANEJADOR -->
+    <div class="panel miraix-metas-panel">
       <div class="panel-title">
         <i data-lucide="sparkles" class="w-4 h-4" style="color:#E31A2A"></i>
         MiraiX — Planejador de Metas
-        <span class="miraix-badge-ia">IA</span>
+        <span class="miraix-ia-badge">IA</span>
       </div>
-      <div class="miraix-sugestoes">
-        <button class="miraix-sug" onclick="mxSetSug('Quero comprar um carro de R$ 40.000 em 2 anos, ganho R$ 4.500 por mês')">🚗 Carro</button>
-        <button class="miraix-sug" onclick="mxSetSug('Quero fazer uma viagem de R$ 8.000 em 6 meses, ganho R$ 3.500 por mês')">✈️ Viagem</button>
-        <button class="miraix-sug" onclick="mxSetSug('Quero reserva de emergência de 6 meses, gasto R$ 2.500/mês e ganho R$ 4.000')">🏦 Reserva</button>
-        <button class="miraix-sug" onclick="mxSetSug('Quero dar entrada num apto de R$ 300.000 em 5 anos, ganho R$ 6.000 por mês')">🏠 Imóvel</button>
+      <div class="miraix-sugs">
+        <button class="miraix-sug" onclick="miraixSetSug('Quero comprar um carro de R$ 40.000 em 2 anos, ganho R$ 4.500 por mês')">🚗 Carro</button>
+        <button class="miraix-sug" onclick="miraixSetSug('Quero fazer uma viagem de R$ 8.000 em 6 meses, ganho R$ 3.500 por mês')">✈️ Viagem</button>
+        <button class="miraix-sug" onclick="miraixSetSug('Quero montar reserva de emergência de 6 meses, gasto R$ 2.500/mês e ganho R$ 4.000')">🏦 Reserva</button>
+        <button class="miraix-sug" onclick="miraixSetSug('Quero dar entrada num apartamento de R$ 300.000 em 5 anos, ganho R$ 6.000 por mês')">🏠 Imóvel</button>
       </div>
-      <div class="miraix-input-row">
-        <input type="text" id="mx-input" placeholder='Ex: "quero comprar um carro de R$ 40mil em 2 anos, ganho R$ 4.500"' autocomplete="off">
-        <button class="miraix-enviar" id="mx-btn" onclick="mxProcessar()">
+      <div class="miraix-row">
+        <input type="text" id="miraix-input" placeholder='Ex: "quero comprar um carro de R$ 40mil em 2 anos, ganho R$ 4.500"' autocomplete="off">
+        <button class="miraix-btn-send" id="miraix-btn" onclick="miraixProcessar()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
-      <div class="miraix-loading" id="mx-loading">⏳ MiraiX calculando seu plano...</div>
-      <div class="miraix-resultado" id="mx-resultado">
-        <h4 id="mx-titulo">Seu plano</h4>
-        <div class="miraix-grid">
-          <div class="miraix-card"><label>Guardar por mês</label><span id="mx-mensal">—</span></div>
-          <div class="miraix-card"><label>Tempo estimado</label><span id="mx-tempo">—</span></div>
-          <div class="miraix-card"><label>% da renda</label><span id="mx-pct">—</span></div>
-          <div class="miraix-card"><label>Valor total</label><span id="mx-total">—</span></div>
+      <div class="miraix-status" id="miraix-status">⏳ MiraiX calculando seu plano...</div>
+      <div class="miraix-result" id="miraix-result">
+        <h4 id="miraix-titulo">Seu plano</h4>
+        <div class="miraix-cards">
+          <div class="miraix-card"><label>Guardar por mês</label><span id="miraix-mensal">—</span></div>
+          <div class="miraix-card"><label>Tempo estimado</label><span id="miraix-tempo">—</span></div>
+          <div class="miraix-card"><label>% da renda</label><span id="miraix-pct">—</span></div>
+          <div class="miraix-card"><label>Valor total</label><span id="miraix-total">—</span></div>
         </div>
-        <div class="miraix-analise-txt" id="mx-analise"></div>
-        <button class="btn-add" onclick="mxAplicar()" style="margin-top:0;">✓ Aplicar esta meta no sistema</button>
+        <div class="miraix-analise" id="miraix-analise"></div>
+        <button class="btn-add" onclick="miraixAplicar()" style="margin-top:0;">✓ Aplicar esta meta no sistema</button>
       </div>
     </div>
 
@@ -2400,19 +2400,19 @@ const SERVICO_CORES = {
   'Discord': '#5865f2',
 };
 const CAT_COLORS = {
-  'Moradia': '#c0392b',
-  'Lazer/Entretenimento': '#e74c3c',
-  'Assinaturas/Mensalidades': '#3a7bd5',
-  'Alimentação': '#d35400',
-  'Transporte': '#6c3483',
-  'Saúde': '#1a7a6e',
-  'Educação': '#922b6e',
-  'Investimentos': '#1e7a45',
-  'Salário': '#1e7a45',
-  'Outros': '#5d6d7e',
-  'Água': '#1a5276',
-  'Luz/Energia': '#9a6a00',
-  'Internet': '#0e6655',
+  'Moradia': '#E31A2A',
+  'Lazer/Entretenimento': '#ff6b35',
+  'Assinaturas/Mensalidades': '#5b8fd4',
+  'Alimentação': '#f5a623',
+  'Transporte': '#a78bca',
+  'Saúde': '#3db8a0',
+  'Educação': '#e06fa0',
+  'Investimentos': '#52b870',
+  'Salário': '#52b870',
+  'Outros': '#8899aa',
+  'Água': '#4a9fd4',
+  'Luz/Energia': '#e0b030',
+  'Internet': '#30b0c0',
 };
 const CAT_ICONS = {
   'Moradia': '🏠',
@@ -3647,90 +3647,103 @@ function pararVoz() {
   if (_reconhecimento) { try { _reconhecimento.stop(); } catch(e) {} }
 }
 
-// ===== MIRAIX — PLANEJADOR DE METAS =====
-let _mxDados = null;
+// ===== MIRAIX PLANEJADOR DE METAS =====
+let _miraixDados = null;
 
-function mxSetSug(txt) {
-  document.getElementById('mx-input').value = txt;
-  mxProcessar();
+function miraixSetSug(txt) {
+  document.getElementById('miraix-input').value = txt;
+  miraixProcessar();
 }
 
-async function mxProcessar() {
-  const texto = document.getElementById('mx-input').value.trim();
+async function miraixProcessar() {
+  const texto = document.getElementById('miraix-input').value.trim();
   if (!texto) { toastMsg('Descreva sua meta primeiro!', 'erro'); return; }
-  const loadEl = document.getElementById('mx-loading');
-  const resEl  = document.getElementById('mx-resultado');
-  const btn    = document.getElementById('mx-btn');
-  loadEl.style.display = 'block';
-  resEl.style.display  = 'none';
+
+  const statusEl = document.getElementById('miraix-status');
+  const resultEl = document.getElementById('miraix-result');
+  const btn = document.getElementById('miraix-btn');
+
+  statusEl.style.display = 'block';
+  resultEl.style.display = 'none';
   btn.disabled = true;
+
   try {
     const res = await fetch('https://hylian-ai.felipeferreira1507.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ texto: 'Você é consultor financeiro brasileiro. Meta do usuário: "' + texto + '". Calcule um plano. Responda APENAS JSON sem markdown: {"titulo":"nome curto","valorTotal":numero,"mesesNecessarios":numero,"poupancaMensal":numero,"percentualRenda":numero,"analise":"2-3 frases com dica objetiva","viavel":true}' })
+      body: JSON.stringify({ texto: `Você é consultor financeiro brasileiro. O usuário quer: "${texto}". Calcule um plano. Responda APENAS JSON: {"titulo":"nome curto da meta","valorTotal":numero,"mesesNecessarios":numero,"poupancaMensal":numero,"percentualRenda":numero,"analise":"2-3 frases objetivas com dica","viavel":true}` })
     });
     const data = await res.json();
-    _mxDados = (data && data.titulo) ? data : mxCalcularLocal(texto);
+    if (data && data.titulo) {
+      _miraixDados = data;
+    } else {
+      _miraixDados = miraixCalcularLocal(texto);
+    }
   } catch(e) {
-    _mxDados = mxCalcularLocal(texto);
+    _miraixDados = miraixCalcularLocal(texto);
   }
-  mxRenderizar(_mxDados);
-  loadEl.style.display = 'none';
+
+  miraixRenderizar(_miraixDados);
+  statusEl.style.display = 'none';
   btn.disabled = false;
 }
 
-function mxCalcularLocal(texto) {
-  const vM = texto.match(/R\$?\s*([\d.,]+(?:\s*mil)?)/i);
-  const mM = texto.match(/(\d+)\s*(mes|m[eê]s|meses|ano|anos)/i);
-  const sM = texto.match(/(?:ganho|recebo|sal[aá]rio)\s*R?\$?\s*([\d.,]+)/i);
+function miraixCalcularLocal(texto) {
+  const valorM = texto.match(/R\$?\s*([\d.,]+(?:\s*mil)?)/i);
+  const mesesM = texto.match(/(\d+)\s*(mes|m[eê]s|meses|ano|anos)/i);
+  const salM = texto.match(/(?:ganho|recebo|salario)\s*R?\$?\s*([\d.,]+)/i);
+
   let val = 20000;
-  if (vM) { let v = vM[1].replace(/\./g,'').replace(',','.'); val = /mil/i.test(vM[1]) ? parseFloat(v)*1000 : parseFloat(v)||20000; }
+  if (valorM) {
+    let v = valorM[1].replace(/\./g,'').replace(',','.').trim();
+    val = v.toLowerCase().includes('mil') ? parseFloat(v)*1000 : parseFloat(v) || 20000;
+  }
   let meses = 24;
-  if (mM) { meses = parseInt(mM[1]); if (/ano/i.test(mM[2])) meses *= 12; }
-  const sal  = sM ? parseFloat(sM[1].replace(/\./g,'').replace(',','.')) : 4000;
+  if (mesesM) {
+    meses = parseInt(mesesM[1]);
+    if (/ano/i.test(mesesM[2])) meses *= 12;
+  }
+  const sal = salM ? parseFloat(salM[1].replace(/\./g,'').replace(',','.')) : 4000;
   const poup = Math.ceil(val / meses);
-  const pct  = Math.round((poup/sal)*100);
+  const pct = Math.round((poup/sal)*100);
+
   return {
     titulo: 'Sua meta financeira',
     valorTotal: val,
     mesesNecessarios: meses,
     poupancaMensal: poup,
     percentualRenda: pct,
-    analise: 'Guardando ' + moeda(poup) + ' por mês você atinge a meta em ' + meses + ' meses.
-
-' +
-      (pct > 35 ? '⚠️ Percentual elevado — considere aumentar o prazo ou reduzir o valor.' : '✓ Meta viável com disciplina financeira.') +
-      '
-
-💡 ' + (pct > 30 ? 'Revise assinaturas e gastos variáveis para liberar renda.' : 'Automatize a poupança no 1º dia do mês para não gastar antes de guardar.'),
+    analise: `Guardando ${moeda(poup)} por mês você atinge sua meta em ${meses} meses.\n\n${pct > 35 ? '⚠️ Percentual elevado — considere aumentar o prazo.' : '✓ Meta viável com disciplina financeira.'}\n\n💡 ${pct > 30 ? 'Revise assinaturas e gastos variáveis para liberar renda.' : 'Automatize a poupança no 1º dia do mês.'}`,
     viavel: pct < 50
   };
 }
 
-function mxRenderizar(m) {
-  document.getElementById('mx-titulo').textContent  = m.titulo || 'Seu plano';
-  document.getElementById('mx-mensal').textContent  = moeda(m.poupancaMensal || 0);
-  document.getElementById('mx-tempo').textContent   = (m.mesesNecessarios || 0) + ' meses';
-  document.getElementById('mx-pct').textContent     = (m.percentualRenda || 0) + '% da renda';
-  document.getElementById('mx-total').textContent   = moeda(m.valorTotal || 0);
-  document.getElementById('mx-analise').textContent = m.analise || '';
-  document.getElementById('mx-resultado').style.display = 'block';
+function miraixRenderizar(m) {
+  document.getElementById('miraix-titulo').textContent = m.titulo || 'Seu plano';
+  document.getElementById('miraix-mensal').textContent = moeda(m.poupancaMensal || 0);
+  document.getElementById('miraix-tempo').textContent = (m.mesesNecessarios || 0) + ' meses';
+  document.getElementById('miraix-pct').textContent = (m.percentualRenda || 0) + '% da renda';
+  document.getElementById('miraix-total').textContent = moeda(m.valorTotal || 0);
+  document.getElementById('miraix-analise').textContent = m.analise || '';
+  document.getElementById('miraix-result').style.display = 'block';
 }
 
-function mxAplicar() {
-  if (!_mxDados) return;
+function miraixAplicar() {
+  if (!_miraixDados) return;
   const pctEl = document.getElementById('meta-pct');
   const recEl = document.getElementById('meta-receita');
-  if (_mxDados.percentualRenda && pctEl) pctEl.value = _mxDados.percentualRenda;
-  if (_mxDados.poupancaMensal && _mxDados.percentualRenda && recEl && !recEl.value)
-    recEl.value = Math.round((_mxDados.poupancaMensal / _mxDados.percentualRenda) * 100);
+  if (_miraixDados.percentualRenda && pctEl) pctEl.value = _miraixDados.percentualRenda;
+  if (_miraixDados.poupancaMensal && _miraixDados.percentualRenda && recEl && !recEl.value) {
+    recEl.value = Math.round((_miraixDados.poupancaMensal / _miraixDados.percentualRenda) * 100);
+  }
   toastMsg('✓ Meta aplicada!');
   renderMetas();
   document.getElementById('meta-receita')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-document.getElementById('mx-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') mxProcessar(); });
+document.getElementById('miraix-input')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') miraixProcessar();
+});
 </script>
 </body>
 </html>
