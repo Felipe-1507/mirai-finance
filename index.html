@@ -85,22 +85,9 @@ window.loginEmail = async function() {
   }
 };
 
-window.cadastrarEmail = async function() {
-  const email = document.getElementById('login-email').value.trim();
-  const senha = document.getElementById('login-senha').value;
-  if (!email || !senha) { toastMsg('Preencha e-mail e senha para criar conta!', 'erro'); return; }
-  if (senha.length < 6) { toastMsg('A senha precisa ter pelo menos 6 caracteres.', 'erro'); return; }
-  try {
-    await createUserWithEmailAndPassword(auth, email, senha);
-    toastMsg('✓ Conta criada com sucesso!');
-  } catch(e) {
-    const msgs = {
-      'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
-      'auth/invalid-email': 'E-mail inválido.',
-      'auth/weak-password': 'Senha muito fraca. Use pelo menos 6 caracteres.',
-    };
-    toastMsg(msgs[e.code] || 'Erro ao criar conta.', 'erro');
-  }
+window.cadastrarEmail = function() {
+  // Abre o modal de cadastro
+  abrirCadastro();
 };
 
 window.recuperarSenha = async function() {
@@ -1841,9 +1828,161 @@ input:focus, select:focus, textarea:focus {
   .miraix-card span { font-size:1rem; font-weight:700; color:#E31A2A; display:block; }
   .miraix-analise { font-size:0.82rem; color:var(--muted-light); line-height:1.6; margin-bottom:12px; white-space:pre-line; }
   @media (max-width:768px) { .miraix-cards { grid-template-columns:1fr; } }
+
+  /* ===== MODAL DE CADASTRO ===== */
+  .cadastro-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 700;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .cadastro-overlay.open { display: flex; }
+  .cadastro-box {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: 24px;
+    padding: 32px 32px 28px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    animation: modalIn 0.2s ease;
+  }
+  .cadastro-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .cadastro-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-light);
+  }
+  .cadastro-close {
+    background: none;
+    border: none;
+    color: var(--muted-light);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    line-height: 1;
+  }
+  .cadastro-close:hover { background: var(--border-light); }
+  .cadastro-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .cadastro-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .cadastro-field label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted-light);
+  }
+  .cadastro-field input {
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    background: var(--surface2-light);
+    color: var(--text-light);
+    font-family: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .cadastro-field input:focus { border-color: #E31A2A; }
+  .cadastro-field input.field-erro { border-color: #E31A2A; }
+  .cadastro-field .field-msg {
+    font-size: 0.72rem;
+    color: #E31A2A;
+    display: none;
+    margin-top: 2px;
+  }
+  .cadastro-field .field-msg.visible { display: block; }
+  .cadastro-field .field-ok { color: var(--green); }
+  .btn-cadastrar {
+    width: 100%;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    background: #E31A2A;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: filter 0.2s;
+  }
+  .btn-cadastrar:hover { filter: brightness(1.1); }
+  .btn-cadastrar:disabled { opacity: 0.5; cursor: not-allowed; }
+  .cadastro-login-link {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.8rem;
+    color: var(--muted-light);
+  }
+  .cadastro-login-link button {
+    background: none;
+    border: none;
+    color: #E31A2A;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    padding: 0;
+    text-decoration: underline;
+  }
 </style>
 </head>
 <body>
+
+<!-- MODAL DE CADASTRO -->
+<div class="cadastro-overlay" id="cadastro-overlay">
+  <div class="cadastro-box">
+    <div class="cadastro-header">
+      <span class="cadastro-title">Criar conta no Mirai Finance</span>
+      <button class="cadastro-close" onclick="fecharCadastro()">✕</button>
+    </div>
+    <div class="cadastro-fields">
+      <div class="cadastro-field">
+        <label>Nome completo</label>
+        <input type="text" id="cad-nome" placeholder="Seu nome" autocomplete="name">
+        <span class="field-msg" id="msg-nome">Informe seu nome completo.</span>
+      </div>
+      <div class="cadastro-field">
+        <label>E-mail</label>
+        <input type="email" id="cad-email" placeholder="seu@email.com" autocomplete="email">
+        <span class="field-msg" id="msg-email">Informe um e-mail válido.</span>
+      </div>
+      <div class="cadastro-field">
+        <label>Senha</label>
+        <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        <span class="field-msg" id="msg-senha">A senha precisa ter pelo menos 6 caracteres.</span>
+      </div>
+      <div class="cadastro-field">
+        <label>Confirmar senha</label>
+        <input type="password" id="cad-senha2" placeholder="Repita a senha" autocomplete="new-password">
+        <span class="field-msg" id="msg-senha2">As senhas não coincidem.</span>
+      </div>
+    </div>
+    <button class="btn-cadastrar" id="btn-cadastrar" onclick="confirmarCadastro()">Criar conta</button>
+    <div class="cadastro-login-link">
+      Já tem conta? <button onclick="fecharCadastro()">Fazer login</button>
+    </div>
+  </div>
+</div>
+
 <!-- TELA DE LOGIN -->
 <div id="login-screen" style="display:none;">
   <div class="login-card">
@@ -1874,6 +2013,9 @@ input:focus, select:focus, textarea:focus {
     </div>
 
     <div class="login-terms">Ao entrar, você concorda com o uso dos seus dados para sincronização entre dispositivos.</div>
+    <div style="margin-top:20px;font-size:0.68rem;color:var(--muted-light);opacity:0.6;letter-spacing:0.3px;">
+      Mirai Finance · <a href="https://kajilabs.dev" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Kaji Labs</a>
+    </div>
   </div>
 </div>
 
@@ -2321,7 +2463,7 @@ input:focus, select:focus, textarea:focus {
 </div><!-- fim #app-shell -->
 
 <footer>
-  Desenvolvido por <a href="https://www.felipeferreira.dev/" target="_blank" rel="noopener noreferrer">Felipe Ferreira</a>
+  Mirai Finance · Desenvolvido por <a href="https://www.felipeferreira.dev/" target="_blank" rel="noopener noreferrer">Felipe Ferreira</a> · <a href="https://kajilabs.dev" target="_blank" rel="noopener noreferrer" style="opacity:0.7;">Kaji Labs</a>
 </footer>
 <div class="toast" id="toast"></div>
 
@@ -3749,6 +3891,130 @@ function miraixAplicar() {
 document.getElementById('miraix-input')?.addEventListener('keydown', e => {
   if (e.key === 'Enter') miraixProcessar();
 });
+
+// ===== MODAL DE CADASTRO =====
+function abrirCadastro() {
+  // Limpa campos
+  ['cad-nome','cad-email','cad-senha','cad-senha2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('field-erro'); }
+  });
+  ['msg-nome','msg-email','msg-senha','msg-senha2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('visible','field-ok'); el.textContent = ''; }
+  });
+  document.getElementById('cadastro-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('cad-nome')?.focus(), 100);
+}
+
+function fecharCadastro() {
+  document.getElementById('cadastro-overlay').classList.remove('open');
+}
+
+// Fecha ao clicar fora
+document.getElementById('cadastro-overlay').addEventListener('click', function(e) {
+  if (e.target === this) fecharCadastro();
+});
+
+// Enter nos campos navega para o próximo
+['cad-nome','cad-email','cad-senha'].forEach((id, i) => {
+  document.getElementById(id)?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const next = ['cad-email','cad-senha','cad-senha2'][i];
+      document.getElementById(next)?.focus();
+    }
+  });
+});
+document.getElementById('cad-senha2')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmarCadastro();
+});
+
+function mostrarErro(campoId, msgId, texto) {
+  const campo = document.getElementById(campoId);
+  const msg   = document.getElementById(msgId);
+  if (campo) campo.classList.add('field-erro');
+  if (msg)   { msg.textContent = texto; msg.classList.add('visible'); msg.classList.remove('field-ok'); }
+}
+
+function limparErro(campoId, msgId) {
+  const campo = document.getElementById(campoId);
+  const msg   = document.getElementById(msgId);
+  if (campo) campo.classList.remove('field-erro');
+  if (msg)   msg.classList.remove('visible');
+}
+
+function validarEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function confirmarCadastro() {
+  const nome   = document.getElementById('cad-nome').value.trim();
+  const email  = document.getElementById('cad-email').value.trim();
+  const senha  = document.getElementById('cad-senha').value;
+  const senha2 = document.getElementById('cad-senha2').value;
+
+  // Limpa erros anteriores
+  ['cad-nome','cad-email','cad-senha','cad-senha2'].forEach(id => {
+    document.getElementById(id)?.classList.remove('field-erro');
+  });
+  ['msg-nome','msg-email','msg-senha','msg-senha2'].forEach(id => {
+    document.getElementById(id)?.classList.remove('visible');
+  });
+
+  // Validações
+  let valido = true;
+
+  if (!nome || nome.length < 2) {
+    mostrarErro('cad-nome', 'msg-nome', 'Informe seu nome completo (mínimo 2 caracteres).');
+    valido = false;
+  }
+  if (!email || !validarEmail(email)) {
+    mostrarErro('cad-email', 'msg-email', 'Informe um e-mail válido.');
+    valido = false;
+  }
+  if (!senha || senha.length < 6) {
+    mostrarErro('cad-senha', 'msg-senha', 'A senha precisa ter pelo menos 6 caracteres.');
+    valido = false;
+  }
+  if (senha !== senha2) {
+    mostrarErro('cad-senha2', 'msg-senha2', 'As senhas não coincidem.');
+    valido = false;
+  }
+
+  if (!valido) return;
+
+  const btn = document.getElementById('btn-cadastrar');
+  btn.disabled = true;
+  btn.textContent = 'Criando conta...';
+
+  try {
+    const { createUserWithEmailAndPassword, updateProfile } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const userCredential = await createUserWithEmailAndPassword(window._fb.auth, email, senha);
+    // Salva o nome de exibição
+    await updateProfile(userCredential.user, { displayName: nome });
+    toastMsg('✓ Conta criada com sucesso! Bem-vindo(a), ' + nome + '!');
+    fecharCadastro();
+  } catch(e) {
+    const msgs = {
+      'auth/email-already-in-use': 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.',
+      'auth/invalid-email':        'O formato do e-mail é inválido.',
+      'auth/weak-password':        'Senha fraca. Use pelo menos 6 caracteres com letras e números.',
+      'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
+    };
+    const msgTexto = msgs[e.code] || 'Erro ao criar conta: ' + (e.message || e.code);
+    // Mostra erro no campo mais provável
+    if (e.code === 'auth/email-already-in-use' || e.code === 'auth/invalid-email') {
+      mostrarErro('cad-email', 'msg-email', msgTexto);
+    } else if (e.code === 'auth/weak-password') {
+      mostrarErro('cad-senha', 'msg-senha', msgTexto);
+    } else {
+      toastMsg(msgTexto, 'erro');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Criar conta';
+  }
+}
 </script>
 </body>
 </html>
